@@ -1,0 +1,37 @@
+{
+  "name": "nano-brain",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "nano-brain": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test-db": "tsx src/test-db.ts"
+  },
+  "keywords": [
+    "mcp",
+    "ai",
+    "memory",
+    "pgvector"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Long-term semantic memory MCP server powered by PostgreSQL pgvector and Gemini embeddings",
+  "dependencies": {
+    "@google/genai": "^2.19.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "dotenv": "^17.4.2",
+    "pg": "^8.23.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2"
+  }
+}
