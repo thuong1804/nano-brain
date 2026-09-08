@@ -9,50 +9,50 @@ import {
 } from './db.js';
 
 async function test() {
-    console.log('=== BẮT ĐẦU KIỂM TRA NANO-BRAIN DB & PGVECTOR ===\n');
+    console.log('=== START TESTING NANO-BRAIN DB & PGVECTOR ===\n');
 
-    // 1. Tự động khởi tạo DB schema
-    console.log('1. Khởi tạo schema (initDb)...');
+    // 1. Automatically initialize database schema
+    console.log('1. Initializing schema (initDb)...');
     await initDb();
-    console.log('   ✓ Đã kích hoạt extension vector và bảng memories.');
+    console.log('   ✓ Vector extension and memories table are ready.');
 
-    // 2. Tạo vector giả lập (768 chiều tương thích text-embedding-004)
+    // 2. Generate mock vector (768 dimensions compatible with gemini-embedding-001)
     const dummyVector = new Array(768).fill(0.01);
 
-    // 3. Lưu thử dữ liệu
-    console.log('\n2. Lưu thử ký ức (saveMemory)...');
+    // 3. Test saving a memory record
+    console.log('\n2. Testing memory insertion (saveMemory)...');
     const saved = await saveMemory(
-        'Đây là kiến thức kiểm tra hệ thống nano-brain local',
+        'This is a test knowledge entry for nano-brain local system',
         dummyVector,
         'test-suite'
     );
-    console.log('   ✓ Đã lưu thành công bản ghi ID:', saved.id);
+    console.log('   ✓ Successfully saved entry with ID:', saved.id);
 
-    // 4. Tìm kiếm thử dữ liệu theo vector
-    console.log('\n3. Tìm kiếm tương đồng (searchSimilarMemory)...');
+    // 4. Test similarity search
+    console.log('\n3. Testing similarity search (searchSimilarMemory)...');
     const searchResults = await searchSimilarMemory(dummyVector, 2, 'test-suite');
-    console.log(`   ✓ Tìm thấy ${searchResults.length} kết quả phù hợp:`, searchResults.map((r: any) => ({
+    console.log(`   ✓ Found ${searchResults.length} matching results:`, searchResults.map((r: any) => ({
         id: r.id,
         content: r.content,
         similarity: Number(r.similarity).toFixed(4),
     })));
 
-    // 5. Liệt kê ký ức gần đây
-    console.log('\n4. Liệt kê ký ức gần đây (listRecentMemories)...');
+    // 5. Test listing recent memories
+    console.log('\n4. Testing listing recent memories (listRecentMemories)...');
     const recent = await listRecentMemories(3);
-    console.log(`   ✓ Lấy được ${recent.length} bản ghi gần nhất.`);
+    console.log(`   ✓ Retrieved ${recent.length} recent entries.`);
 
-    // 6. Xóa ký ức vừa tạo
-    console.log('\n5. Dọn dẹp bản ghi kiểm tra (deleteMemory)...');
+    // 6. Test deleting the created test record
+    console.log('\n5. Cleaning up test entry (deleteMemory)...');
     const deleted = await deleteMemory(saved.id);
-    console.log(`   ✓ Trạng thái xóa ID ${saved.id}:`, deleted ? 'Thành công' : 'Thất bại');
+    console.log(`   ✓ Delete status for ID ${saved.id}:`, deleted ? 'Success' : 'Failed');
 
     await pool.end();
-    console.log('\n=== HOÀN TẤT KIỂM TRA TOÀN BỘ CHỨC NĂNG ===');
+    console.log('\n=== COMPLETED ALL TESTS SUCCESSFULLY ===');
 }
 
 test().catch(async (err) => {
-    console.error('Lỗi khi kiểm tra DB:', err.message);
+    console.error('Database test error:', err.message);
     await pool.end();
     process.exit(1);
 });

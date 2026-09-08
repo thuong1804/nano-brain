@@ -9,7 +9,7 @@ export const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
 });
 
-// Hàm khởi tạo extension pgvector, bảng memories và index HNSW
+// Initialize pgvector extension, memories table, and HNSW index
 export async function initDb() {
     await pool.query(`
         CREATE EXTENSION IF NOT EXISTS vector;
@@ -24,7 +24,7 @@ export async function initDb() {
     `);
 }
 
-// Hàm lưu một đoạn ký ức kèm vector vào DB
+// Store a memory record with its embedding vector into the database
 export async function saveMemory(content: string, embedding: number[], source: string = 'general') {
     const vectorStr = `[${embedding.join(',')}]`;
     const query = `
@@ -36,7 +36,7 @@ export async function saveMemory(content: string, embedding: number[], source: s
     return res.rows[0];
 }
 
-// Hàm tìm kiếm ký ức tương đồng theo Cosine Similarity (hỗ trợ lọc theo source)
+// Search for similar memories using Cosine Similarity (with optional source filtering)
 export async function searchSimilarMemory(embedding: number[], limit: number = 5, source?: string) {
     const vectorStr = `[${embedding.join(',')}]`;
 
@@ -53,16 +53,16 @@ export async function searchSimilarMemory(embedding: number[], limit: number = 5
     }
 
     const query = `
-        SELECT id, content, source, 1 - (embedding <=> $1) AS similarity, created_at
-        FROM memories 
-        ORDER BY embedding <=> $1 
-        LIMIT $2;
-    `;
+            SELECT id, content, source, 1 - (embedding <=> $1) AS similarity, created_at
+            FROM memories 
+            ORDER BY embedding <=> $1 
+            LIMIT $2;
+        `;
     const res = await pool.query(query, [vectorStr, limit]);
     return res.rows;
 }
 
-// Hàm lấy danh sách các ký ức gần đây nhất
+// Retrieve the most recent memory records
 export async function listRecentMemories(limit: number = 10, source?: string) {
     if (source) {
         const query = `
@@ -86,7 +86,7 @@ export async function listRecentMemories(limit: number = 10, source?: string) {
     return res.rows;
 }
 
-// Hàm xóa ký ức theo ID
+// Delete a memory record by ID
 export async function deleteMemory(id: number) {
     const query = `
         DELETE FROM memories

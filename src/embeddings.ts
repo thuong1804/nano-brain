@@ -9,8 +9,11 @@ const ai = new GoogleGenAI({
 export async function getEmbedding(text: string): Promise<number[]> {
   if (process.env.GEMINI_API_KEY) {
     const response = await ai.models.embedContent({
-      model: 'text-embedding-004',
+      model: 'gemini-embedding-001',
       contents: text,
+      config: {
+        outputDimensionality: 768,
+      },
     });
 
     if (response.embeddings && response.embeddings.length > 0 && response.embeddings[0].values) {
@@ -18,7 +21,7 @@ export async function getEmbedding(text: string): Promise<number[]> {
     }
   }
 
-  // Fallback giả lập vector 768 chiều nếu chưa có key
+  // Fallback mock 768-dimensional vector if API key is not provided
   const fallbackDim = 768;
   const vector = new Array(fallbackDim).fill(0);
   for (let i = 0; i < text.length; i++) {

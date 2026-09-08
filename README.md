@@ -1,6 +1,6 @@
 # nano-brain
 
-A lightweight, long-term semantic memory [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server powered by **PostgreSQL (`pgvector`)** and **Google Gemini embeddings (`text-embedding-004`)**.
+A lightweight, long-term semantic memory [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server powered by **PostgreSQL (`pgvector`)** and **Google Gemini embeddings (`gemini-embedding-001`)**.
 
 `nano-brain` enables AI assistants (Antigravity, Claude Desktop, Cursor, Zed, Windsurf, etc.) to store, retrieve, and manage persistent semantic knowledge, project conventions, architectural decisions, and session learnings across chats.
 
@@ -8,7 +8,7 @@ A lightweight, long-term semantic memory [Model Context Protocol (MCP)](https://
 
 ## Features
 
-- **Semantic Memory Storage (`memory_save`)**: Automatically converts plain text into 768-dimensional embeddings using Gemini `text-embedding-004` and stores them in PostgreSQL.
+- **Semantic Memory Storage (`memory_save`)**: Automatically converts plain text into 768-dimensional embeddings using Gemini `gemini-embedding-001` (configured with MRL 768) and stores them in PostgreSQL.
 - **Fast Similarity Search (`memory_query`)**: Uses cosine distance with an **HNSW index** in `pgvector` to perform real-time semantic retrieval, with optional source-based filtering.
 - **Memory Inspection & Deletion (`memory_list`, `memory_delete`)**: Query recent memories or prune outdated entries by ID.
 - **Auto Schema Provisioning**: On startup, automatically enables the `vector` extension, creates the `memories` table, and sets up the HNSW index if they do not exist.
@@ -31,7 +31,7 @@ A lightweight, long-term semantic memory [Model Context Protocol (MCP)](https://
             │ Gemini API               │ PostgreSQL Protocol
 ┌───────────▼───────────┐  ┌───────────▼───────────┐
 │     Google Gemini     │  │  PostgreSQL (pg16)    │
-│  (text-embedding-004) │  │  + pgvector (HNSW)    │
+│ (gemini-embedding-001)│  │  + pgvector (HNSW)    │
 └───────────────────────┘  └───────────────────────┘
 ```
 
@@ -83,7 +83,7 @@ Update the configuration:
 # PostgreSQL connection string with pgvector extension
 DATABASE_URL=postgresql://postgres:081842000tT@localhost:5432/nano_brain
 
-# Google Gemini API key for text-embedding-004
+# Google Gemini API key for gemini-embedding-001
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 

@@ -28,27 +28,27 @@ const server = new Server(
     }
 );
 
-// 1. Khai báo danh sách Tool với Client
+// 1. Register tools with the MCP Client
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
         tools: [
             {
                 name: 'memory_query',
-                description: 'Truy vấn ngữ cảnh, giải pháp, quy ước hoặc thông tin đã lưu trong bộ nhớ theo ngữ nghĩa tương đồng',
+                description: 'Retrieve context, solutions, rules, or saved knowledge from long-term memory via semantic similarity search',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         query: {
                             type: 'string',
-                            description: 'Câu hỏi hoặc từ khóa cần tra cứu ngữ cảnh',
+                            description: 'The search query, question, or keywords to look up relevant context',
                         },
                         limit: {
                             type: 'number',
-                            description: 'Số lượng kết quả trả về tối đa (mặc định 5)',
+                            description: 'Maximum number of results to return (default: 5)',
                         },
                         source: {
                             type: 'string',
-                            description: 'Lọc kết quả theo nguồn cụ thể (tùy chọn: cursor, antigravity, manual...)',
+                            description: 'Optional filter by source tag (e.g., cursor, antigravity, project-name)',
                         },
                     },
                     required: ['query'],
@@ -56,17 +56,17 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             {
                 name: 'memory_save',
-                description: 'Lưu lại bài học, quy ước kiến trúc, giải pháp hoặc ghi nhớ quan trọng vào bộ não',
+                description: 'Save learnings, architectural decisions, code conventions, solutions, or key findings into persistent long-term memory',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         content: {
                             type: 'string',
-                            description: 'Nội dung chi tiết cần ghi nhớ',
+                            description: 'The detailed knowledge or information to memorize',
                         },
                         source: {
                             type: 'string',
-                            description: 'Nguồn thông tin (cursor, antigravity, zed, manual...) - mặc định manual',
+                            description: 'Source or namespace tag (e.g., cursor, antigravity, project-name, manual) - defaults to manual',
                         },
                     },
                     required: ['content'],
@@ -74,30 +74,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             {
                 name: 'memory_list',
-                description: 'Liệt kê danh sách các ký ức mới nhất đã lưu trong bộ não',
+                description: 'List the most recently saved memories ordered by creation time',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         limit: {
                             type: 'number',
-                            description: 'Số lượng bản ghi cần lấy (mặc định 10)',
+                            description: 'Number of recent entries to retrieve (default: 10)',
                         },
                         source: {
                             type: 'string',
-                            description: 'Lọc theo nguồn (tùy chọn)',
+                            description: 'Optional filter by source tag',
                         },
                     },
                 },
             },
             {
                 name: 'memory_delete',
-                description: 'Xóa một ghi nhớ khỏi bộ não dựa vào ID',
+                description: 'Delete a specific memory entry by its unique ID',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         id: {
                             type: 'number',
-                            description: 'ID của bản ghi nhớ cần xóa',
+                            description: 'The numeric ID of the memory entry to delete',
                         },
                     },
                     required: ['id'],
@@ -107,7 +107,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     };
 });
 
-// 2. Xử lý logic khi Client gọi Tool
+// 2. Handle tool invocation from the MCP Client
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
@@ -141,7 +141,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 content: [
                     {
                         type: 'text',
-                        text: `Đã lưu thành công vào bộ nhớ với ID: ${saved.id} (Source: ${saved.source})`,
+                        text: `Successfully saved to memory with ID: ${saved.id} (Source: ${saved.source})`,
                     },
                 ],
             };
@@ -166,7 +166,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (name === 'memory_delete') {
             const id = Number(args?.id);
             if (!id || isNaN(id)) {
-                throw new Error('Tham số id phải là số hợp lệ.');
+                throw new Error('The id argument must be a valid number.');
             }
 
             const deleted = await deleteMemory(id);
@@ -176,42 +176,42 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     {
                         type: 'text',
                         text: deleted
-                            ? `Đã xóa thành công ký ức ID: ${id}`
-                            : `Không tìm thấy ký ức mang ID: ${id} để xóa`,
+                            ? `Successfully deleted memory ID: ${id}`
+                            : `Memory with ID: ${id} not found`,
                     },
                 ],
             };
         }
 
-        throw new Error(`Tool không tồn tại: ${name}`);
+        throw new Error(`Unknown tool: ${name}`);
     } catch (error: any) {
         return {
             isError: true,
             content: [
                 {
                     type: 'text',
-                    text: `Lỗi xử lý: ${error.message}`,
+                    text: `Execution error: ${error.message}`,
                 },
             ],
         };
     }
 });
 
-// 3. Khởi chạy Server qua kênh giao tiếp stdio
+// 3. Start the MCP Server via stdio transport
 async function main() {
     try {
         await initDb();
-        console.error('[nano-brain] Đã kết nối DB và đảm bảo bảng memories / pgvector tồn tại.');
+        console.error('[nano-brain] Connected to database and ensured memories table / pgvector extension are ready.');
     } catch (dbErr: any) {
-        console.error('[nano-brain] Cảnh báo kết nối/khởi tạo DB:', dbErr.message);
+        console.error('[nano-brain] DB connection/initialization warning:', dbErr.message);
     }
 
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error('[nano-brain] nano-brain MCP Server đang chạy qua stdio...');
+    console.error('[nano-brain] nano-brain MCP Server running on stdio...');
 }
 
 main().catch((err) => {
-    console.error('[nano-brain] Lỗi khởi động server:', err);
+    console.error('[nano-brain] Fatal server startup error:', err);
     process.exit(1);
 });
